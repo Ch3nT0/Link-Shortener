@@ -2,19 +2,43 @@ const swaggerDocument = {
   openapi: "3.0.0",
   info: {
     title: "Serverless URL Shortener API",
-    version: "1.0.0",
-    description: "API Documentation for Link-Shortener project"
+    version: "1.0.0"
   },
   paths: {
     "/shorten": {
       post: {
         summary: "Tạo link rút gọn",
-        responses: { "200": { description: "Thành công" } }
+        responses: { "200": { description: "Thành công" } },
+        // Thêm phần này để hiện ô nhập liệu (Input)
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  longUrl: {
+                    type: "string",
+                    example: "https://google.com"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/{shortCode}": {
       get: {
-        summary: "Điều hướng đến URL gốc",
+        summary: "Truy cập link ngắn",
+        parameters: [
+          {
+            name: "shortCode",
+            in: "path",
+            required: true,
+            schema: { type: "string" }
+          }
+        ],
         responses: { "301": { description: "Redirect" } }
       }
     }
