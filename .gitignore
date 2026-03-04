@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Serverless folders
+.serverless/
+.serverless_plugins/
+
+# Environment variables (Bảo mật - đừng bao giờ push file này)
+.env
+.env.*
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db

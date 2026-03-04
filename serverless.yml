@@ -44,3 +44,17 @@ resources:
           - AttributeName: shortCode
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
+
+functions:
+  shorten:
+    handler: handler.shorten
+    events:
+      - http: { path: shorten, method: post }
+  redirect:
+    handler: handler.redirect
+    events:
+      - http: { path: /{shortCode}, method: get }
+  docs:
+    handler: swagger.handler
+    events:
+      - http: { path: docs, method: get } # Truy cập qua https://.../dev/docs
