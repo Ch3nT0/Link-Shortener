@@ -4,6 +4,12 @@ const swaggerDocument = {
     title: "Serverless URL Shortener API",
     version: "1.0.0"
   },
+  servers: [
+    {
+      url: "https://qe8riffx66.execute-api.us-east-1.amazonaws.com/dev",
+      description: "Development server"
+    },
+  ],
   paths: {
     "/shorten": {
       post: {
