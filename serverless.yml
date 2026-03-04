@@ -1,0 +1,46 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: chento
+service: serverless-url-shortener
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  environment:
+    TABLE_NAME: ${self:service}-table
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:GetItem
+          Resource: !GetAtt UrlTable.Arn
+
+functions:
+  shorten:
+    handler: handler.shorten
+    events:
+      - http:
+          path: shorten
+          method: post
+  redirect:
+    handler: handler.redirect
+    events:
+      - http:
+          path: /{shortCode}
+          method: get
+
+resources:
+  Resources:
+    UrlTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-table
+        AttributeDefinitions:
+          - AttributeName: shortCode
+            AttributeType: S
+        KeySchema:
+          - AttributeName: shortCode
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST

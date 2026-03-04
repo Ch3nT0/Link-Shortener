@@ -1,0 +1,1615 @@
+{
+  "/home/chen/Documents/ptit/Chen/Link Shortener/serverless.yml": {
+    "versionFramework": "4.33.0",
+    "servicePath": "/home/chen/Documents/ptit/Chen/Link Shortener/serverless.yml",
+    "serviceConfigFileName": "serverless.yml",
+    "service": {
+      "org": "chento",
+      "service": "serverless-url-shortener",
+      "provider": {
+        "name": "aws",
+        "runtime": "nodejs18.x",
+        "region": "us-east-1",
+        "environment": {
+          "TABLE_NAME": "serverless-url-shortener-table"
+        },
+        "iam": {
+          "role": {
+            "statements": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "dynamodb:PutItem",
+                  "dynamodb:GetItem"
+                ],
+                "Resource": {
+                  "Fn::GetAtt": [
+                    "UrlTable",
+                    "Arn"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "stage": "dev",
+        "versionFunctions": true,
+        "compiledCloudFormationTemplate": {
+          "AWSTemplateFormatVersion": "2010-09-09",
+          "Description": "The AWS CloudFormation template for this Serverless application",
+          "Resources": {
+            "ShortenLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/serverless-url-shortener-dev-shorten"
+              }
+            },
+            "RedirectLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/serverless-url-shortener-dev-redirect"
+              }
+            },
+            "IamRoleLambdaExecution": {
+              "Type": "AWS::IAM::Role",
+              "Properties": {
+                "AssumeRolePolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Principal": {
+                        "Service": [
+                          "lambda.amazonaws.com"
+                        ]
+                      },
+                      "Action": [
+                        "sts:AssumeRole"
+                      ]
+                    }
+                  ]
+                },
+                "Policies": [
+                  {
+                    "PolicyName": {
+                      "Fn::Join": [
+                        "-",
+                        [
+                          "serverless-url-shortener",
+                          "dev",
+                          "lambda"
+                        ]
+                      ]
+                    },
+                    "PolicyDocument": {
+                      "Version": "2012-10-17",
+                      "Statement": [
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "logs:CreateLogStream",
+                            "logs:CreateLogGroup",
+                            "logs:TagResource"
+                          ],
+                          "Resource": [
+                            {
+                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-url-shortener-dev*:*"
+                            }
+                          ]
+                        },
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "logs:PutLogEvents"
+                          ],
+                          "Resource": [
+                            {
+                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-url-shortener-dev*:*:*"
+                            }
+                          ]
+                        },
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "dynamodb:PutItem",
+                            "dynamodb:GetItem"
+                          ],
+                          "Resource": {
+                            "Fn::GetAtt": [
+                              "UrlTable",
+                              "Arn"
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "Path": "/",
+                "RoleName": {
+                  "Fn::Join": [
+                    "-",
+                    [
+                      "serverless-url-shortener",
+                      "dev",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      "lambdaRole"
+                    ]
+                  ]
+                }
+              }
+            },
+            "ShortenLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": "serverless-framework-deployments-us-east-1-2ecb83af-621c",
+                  "S3Key": "serverless/serverless-url-shortener/dev/1772623413616-2026-03-04T11:23:33.616Z/serverless-url-shortener.zip"
+                },
+                "Handler": "handler.shorten",
+                "Runtime": "nodejs18.x",
+                "FunctionName": "serverless-url-shortener-dev-shorten",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Environment": {
+                  "Variables": {
+                    "TABLE_NAME": "serverless-url-shortener-table"
+                  }
+                },
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "ShortenLogGroup"
+              ]
+            },
+            "RedirectLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": "serverless-framework-deployments-us-east-1-2ecb83af-621c",
+                  "S3Key": "serverless/serverless-url-shortener/dev/1772623413616-2026-03-04T11:23:33.616Z/serverless-url-shortener.zip"
+                },
+                "Handler": "handler.redirect",
+                "Runtime": "nodejs18.x",
+                "FunctionName": "serverless-url-shortener-dev-redirect",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Environment": {
+                  "Variables": {
+                    "TABLE_NAME": "serverless-url-shortener-table"
+                  }
+                },
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "RedirectLogGroup"
+              ]
+            },
+            "ShortenLambdaVersion1IBRI87HYpwXv2yv1CB5cqbbmUYLD5A4mmb7G877tY": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "ShortenLambdaFunction"
+                },
+                "CodeSha256": "m48usPY6B9wIPA3kVaaUPBnXJH7+K9XRhlPdEm0P6i8="
+              }
+            },
+            "RedirectLambdaVersionlNmxMKmumlL1h3scoUV8QWUduA9nfON7ImNKI0LkITU": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "RedirectLambdaFunction"
+                },
+                "CodeSha256": "m48usPY6B9wIPA3kVaaUPBnXJH7+K9XRhlPdEm0P6i8="
+              }
+            },
+            "ApiGatewayRestApi": {
+              "Type": "AWS::ApiGateway::RestApi",
+              "Properties": {
+                "Name": "dev-serverless-url-shortener",
+                "EndpointConfiguration": {
+                  "Types": [
+                    "EDGE"
+                  ]
+                },
+                "Policy": ""
+              }
+            },
+            "ApiGatewayResourceShorten": {
+              "Type": "AWS::ApiGateway::Resource",
+              "Properties": {
+                "ParentId": {
+                  "Fn::GetAtt": [
+                    "ApiGatewayRestApi",
+                    "RootResourceId"
+                  ]
+                },
+                "PathPart": "shorten",
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                }
+              }
+            },
+            "ApiGatewayResourceShortcodeVar": {
+              "Type": "AWS::ApiGateway::Resource",
+              "Properties": {
+                "ParentId": {
+                  "Fn::GetAtt": [
+                    "ApiGatewayRestApi",
+                    "RootResourceId"
+                  ]
+                },
+                "PathPart": "{shortCode}",
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                }
+              }
+            },
+            "ApiGatewayMethodShortenPost": {
+              "Type": "AWS::ApiGateway::Method",
+              "Properties": {
+                "HttpMethod": "POST",
+                "RequestParameters": {},
+                "ResourceId": {
+                  "Ref": "ApiGatewayResourceShorten"
+                },
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": "<REDACTED>",
+                "AuthorizationType": "NONE",
+                "Integration": {
+                  "IntegrationHttpMethod": "POST",
+                  "Type": "AWS_PROXY",
+                  "Uri": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition"
+                        },
+                        ":apigateway:",
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        ":lambda:path/2015-03-31/functions/",
+                        {
+                          "Fn::GetAtt": [
+                            "ShortenLambdaFunction",
+                            "Arn"
+                          ]
+                        },
+                        "/invocations"
+                      ]
+                    ]
+                  }
+                },
+                "MethodResponses": []
+              },
+              "DependsOn": [
+                "ShortenLambdaPermissionApiGateway"
+              ]
+            },
+            "ApiGatewayMethodShortcodeVarGet": {
+              "Type": "AWS::ApiGateway::Method",
+              "Properties": {
+                "HttpMethod": "GET",
+                "RequestParameters": {},
+                "ResourceId": {
+                  "Ref": "ApiGatewayResourceShortcodeVar"
+                },
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": "<REDACTED>",
+                "AuthorizationType": "NONE",
+                "Integration": {
+                  "IntegrationHttpMethod": "POST",
+                  "Type": "AWS_PROXY",
+                  "Uri": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition"
+                        },
+                        ":apigateway:",
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        ":lambda:path/2015-03-31/functions/",
+                        {
+                          "Fn::GetAtt": [
+                            "RedirectLambdaFunction",
+                            "Arn"
+                          ]
+                        },
+                        "/invocations"
+                      ]
+                    ]
+                  }
+                },
+                "MethodResponses": []
+              },
+              "DependsOn": [
+                "RedirectLambdaPermissionApiGateway"
+              ]
+            },
+            "ApiGatewayDeployment1772623403164": {
+              "Type": "AWS::ApiGateway::Deployment",
+              "Properties": {
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "StageName": "dev"
+              },
+              "DependsOn": [
+                "ApiGatewayMethodShortenPost",
+                "ApiGatewayMethodShortcodeVarGet"
+              ]
+            },
+            "ShortenLambdaPermissionApiGateway": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "ShortenLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "/*/*"
+                    ]
+                  ]
+                }
+              }
+            },
+            "RedirectLambdaPermissionApiGateway": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "RedirectLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "/*/*"
+                    ]
+                  ]
+                }
+              }
+            },
+            "UrlTable": {
+              "Type": "AWS::DynamoDB::Table",
+              "Properties": {
+                "TableName": "serverless-url-shortener-table",
+                "AttributeDefinitions": [
+                  {
+                    "AttributeName": "shortCode",
+                    "AttributeType": "S"
+                  }
+                ],
+                "KeySchema": [
+                  {
+                    "AttributeName": "shortCode",
+                    "KeyType": "HASH"
+                  }
+                ],
+                "BillingMode": "PAY_PER_REQUEST"
+              }
+            }
+          },
+          "Outputs": {
+            "ServerlessDeploymentBucketName": {
+              "Value": "serverless-framework-deployments-us-east-1-2ecb83af-621c",
+              "Export": {
+                "Name": "sls-serverless-url-shortener-dev-ServerlessDeploymentBucketName"
+              }
+            },
+            "ShortenLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "ShortenLambdaVersion1IBRI87HYpwXv2yv1CB5cqbbmUYLD5A4mmb7G877tY"
+              },
+              "Export": {
+                "Name": "sls-serverless-url-shortener-dev-ShortenLambdaFunctionQualifiedArn"
+              }
+            },
+            "RedirectLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "RedirectLambdaVersionlNmxMKmumlL1h3scoUV8QWUduA9nfON7ImNKI0LkITU"
+              },
+              "Export": {
+                "Name": "sls-serverless-url-shortener-dev-RedirectLambdaFunctionQualifiedArn"
+              }
+            },
+            "ServiceEndpoint": {
+              "Description": "URL of the service endpoint",
+              "Value": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "https://",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    ".execute-api.",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ".",
+                    {
+                      "Ref": "AWS::URLSuffix"
+                    },
+                    "/dev"
+                  ]
+                ]
+              },
+              "Export": {
+                "Name": "sls-serverless-url-shortener-dev-ServiceEndpoint"
+              }
+            }
+          }
+        },
+        "vpc": {}
+      },
+      "functions": {
+        "shorten": {
+          "handler": "handler.shorten",
+          "events": [
+            {
+              "http": {
+                "path": "shorten",
+                "method": "post",
+                "integration": "AWS_PROXY"
+              }
+            }
+          ],
+          "name": "serverless-url-shortener-dev-shorten",
+          "package": {},
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "nodejs18.x",
+          "vpc": {},
+          "versionLogicalId": "ShortenLambdaVersion1IBRI87HYpwXv2yv1CB5cqbbmUYLD5A4mmb7G877tY"
+        },
+        "redirect": {
+          "handler": "handler.redirect",
+          "events": [
+            {
+              "http": {
+                "path": "{shortCode}",
+                "method": "get",
+                "integration": "AWS_PROXY"
+              }
+            }
+          ],
+          "name": "serverless-url-shortener-dev-redirect",
+          "package": {},
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "nodejs18.x",
+          "vpc": {},
+          "versionLogicalId": "RedirectLambdaVersionlNmxMKmumlL1h3scoUV8QWUduA9nfON7ImNKI0LkITU"
+        }
+      },
+      "resources": {
+        "Resources": {
+          "UrlTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "serverless-url-shortener-table",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "shortCode",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "shortCode",
+                  "KeyType": "HASH"
+                }
+              ],
+              "BillingMode": "PAY_PER_REQUEST"
+            }
+          }
+        },
+        "Outputs": {}
+      }
+    },
+    "provider": {
+      "name": "aws",
+      "runtime": "nodejs18.x",
+      "region": "us-east-1",
+      "environment": {
+        "TABLE_NAME": "serverless-url-shortener-table"
+      },
+      "iam": {
+        "role": {
+          "statements": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:PutItem",
+                "dynamodb:GetItem"
+              ],
+              "Resource": {
+                "Fn::GetAtt": [
+                  "UrlTable",
+                  "Arn"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "stage": "dev",
+      "versionFunctions": true,
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "ShortenLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/serverless-url-shortener-dev-shorten"
+            }
+          },
+          "RedirectLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/serverless-url-shortener-dev-redirect"
+            }
+          },
+          "IamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "serverless-url-shortener",
+                        "dev",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream",
+                          "logs:CreateLogGroup",
+                          "logs:TagResource"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-url-shortener-dev*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-url-shortener-dev*:*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "dynamodb:PutItem",
+                          "dynamodb:GetItem"
+                        ],
+                        "Resource": {
+                          "Fn::GetAtt": [
+                            "UrlTable",
+                            "Arn"
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "serverless-url-shortener",
+                    "dev",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "lambdaRole"
+                  ]
+                ]
+              }
+            }
+          },
+          "ShortenLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-us-east-1-2ecb83af-621c",
+                "S3Key": "serverless/serverless-url-shortener/dev/1772623413616-2026-03-04T11:23:33.616Z/serverless-url-shortener.zip"
+              },
+              "Handler": "handler.shorten",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "serverless-url-shortener-dev-shorten",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "TABLE_NAME": "serverless-url-shortener-table"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "ShortenLogGroup"
+            ]
+          },
+          "RedirectLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-us-east-1-2ecb83af-621c",
+                "S3Key": "serverless/serverless-url-shortener/dev/1772623413616-2026-03-04T11:23:33.616Z/serverless-url-shortener.zip"
+              },
+              "Handler": "handler.redirect",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "serverless-url-shortener-dev-redirect",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "TABLE_NAME": "serverless-url-shortener-table"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "RedirectLogGroup"
+            ]
+          },
+          "ShortenLambdaVersion1IBRI87HYpwXv2yv1CB5cqbbmUYLD5A4mmb7G877tY": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "ShortenLambdaFunction"
+              },
+              "CodeSha256": "m48usPY6B9wIPA3kVaaUPBnXJH7+K9XRhlPdEm0P6i8="
+            }
+          },
+          "RedirectLambdaVersionlNmxMKmumlL1h3scoUV8QWUduA9nfON7ImNKI0LkITU": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "RedirectLambdaFunction"
+              },
+              "CodeSha256": "m48usPY6B9wIPA3kVaaUPBnXJH7+K9XRhlPdEm0P6i8="
+            }
+          },
+          "ApiGatewayRestApi": {
+            "Type": "AWS::ApiGateway::RestApi",
+            "Properties": {
+              "Name": "dev-serverless-url-shortener",
+              "EndpointConfiguration": {
+                "Types": [
+                  "EDGE"
+                ]
+              },
+              "Policy": ""
+            }
+          },
+          "ApiGatewayResourceShorten": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "PathPart": "shorten",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceShortcodeVar": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "PathPart": "{shortCode}",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodShortenPost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "POST",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceShorten"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": "<REDACTED>",
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "ShortenLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "ShortenLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayMethodShortcodeVarGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "GET",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceShortcodeVar"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": "<REDACTED>",
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "RedirectLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "RedirectLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayDeployment1772623403164": {
+            "Type": "AWS::ApiGateway::Deployment",
+            "Properties": {
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "StageName": "dev"
+            },
+            "DependsOn": [
+              "ApiGatewayMethodShortenPost",
+              "ApiGatewayMethodShortcodeVarGet"
+            ]
+          },
+          "ShortenLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "ShortenLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "RedirectLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "RedirectLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "UrlTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "serverless-url-shortener-table",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "shortCode",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "shortCode",
+                  "KeyType": "HASH"
+                }
+              ],
+              "BillingMode": "PAY_PER_REQUEST"
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": "serverless-framework-deployments-us-east-1-2ecb83af-621c",
+            "Export": {
+              "Name": "sls-serverless-url-shortener-dev-ServerlessDeploymentBucketName"
+            }
+          },
+          "ShortenLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "ShortenLambdaVersion1IBRI87HYpwXv2yv1CB5cqbbmUYLD5A4mmb7G877tY"
+            },
+            "Export": {
+              "Name": "sls-serverless-url-shortener-dev-ShortenLambdaFunctionQualifiedArn"
+            }
+          },
+          "RedirectLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "RedirectLambdaVersionlNmxMKmumlL1h3scoUV8QWUduA9nfON7ImNKI0LkITU"
+            },
+            "Export": {
+              "Name": "sls-serverless-url-shortener-dev-RedirectLambdaFunctionQualifiedArn"
+            }
+          },
+          "ServiceEndpoint": {
+            "Description": "URL of the service endpoint",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://",
+                  {
+                    "Ref": "ApiGatewayRestApi"
+                  },
+                  ".execute-api.",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ".",
+                  {
+                    "Ref": "AWS::URLSuffix"
+                  },
+                  "/dev"
+                ]
+              ]
+            },
+            "Export": {
+              "Name": "sls-serverless-url-shortener-dev-ServiceEndpoint"
+            }
+          }
+        }
+      },
+      "vpc": {}
+    },
+    "dashboard": {
+      "isEnabledForService": false,
+      "requiredAuthentication": false,
+      "orgFeaturesInUse": null,
+      "orgObservabilityIntegrations": null,
+      "serviceAppId": null,
+      "serviceProvider": null,
+      "instanceParameters": null
+    },
+    "serviceRawFile": "# \"org\" ensures this Service is used with the correct Serverless Framework Access Key.\norg: chento\nservice: serverless-url-shortener\n\nprovider:\n  name: aws\n  runtime: nodejs18.x\n  region: us-east-1\n  environment:\n    TABLE_NAME: ${self:service}-table\n  iam:\n    role:\n      statements:\n        - Effect: Allow\n          Action:\n            - dynamodb:PutItem\n            - dynamodb:GetItem\n          Resource: !GetAtt UrlTable.Arn\n\nfunctions:\n  shorten:\n    handler: handler.shorten\n    events:\n      - http:\n          path: shorten\n          method: post\n  redirect:\n    handler: handler.redirect\n    events:\n      - http:\n          path: /{shortCode}\n          method: get\n\nresources:\n  Resources:\n    UrlTable:\n      Type: AWS::DynamoDB::Table\n      Properties:\n        TableName: ${self:service}-table\n        AttributeDefinitions:\n          - AttributeName: shortCode\n            AttributeType: S\n        KeySchema:\n          - AttributeName: shortCode\n            KeyType: HASH\n        BillingMode: PAY_PER_REQUEST",
+    "command": [
+      "deploy"
+    ],
+    "options": {},
+    "orgId": "ac571e61-acc1-4815-bc80-a6a608b07d39",
+    "orgName": "chento",
+    "userId": "0pfSFG7Lm5FKLCZPNW",
+    "userName": "chento",
+    "serviceProviderAwsAccountId": "469164977878",
+    "serviceProviderAwsCfStackName": "serverless-url-shortener-dev",
+    "serviceProviderAwsCfStackId": "arn:aws:cloudformation:us-east-1:469164977878:stack/serverless-url-shortener-dev/9cb4a150-17bc-11f1-84a2-12403e3749c7",
+    "serviceProviderAwsCfStackCreated": "2026-03-04T11:23:47.668Z",
+    "serviceProviderAwsCfStackUpdated": null,
+    "serviceProviderAwsCfStackStatus": "CREATE_COMPLETE",
+    "serviceProviderAwsCfStackOutputs": [
+      {
+        "OutputKey": "ShortenLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:469164977878:function:serverless-url-shortener-dev-shorten:1",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-serverless-url-shortener-dev-ShortenLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "RedirectLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:469164977878:function:serverless-url-shortener-dev-redirect:1",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-serverless-url-shortener-dev-RedirectLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "ServiceEndpoint",
+        "OutputValue": "https://qe8riffx66.execute-api.us-east-1.amazonaws.com/dev",
+        "Description": "URL of the service endpoint",
+        "ExportName": "sls-serverless-url-shortener-dev-ServiceEndpoint"
+      },
+      {
+        "OutputKey": "ServerlessDeploymentBucketName",
+        "OutputValue": "serverless-framework-deployments-us-east-1-2ecb83af-621c",
+        "ExportName": "sls-serverless-url-shortener-dev-ServerlessDeploymentBucketName"
+      }
+    ],
+    "compiledCloudFormationTemplate": {
+      "AWSTemplateFormatVersion": "2010-09-09",
+      "Description": "The AWS CloudFormation template for this Serverless application",
+      "Resources": {
+        "ShortenLogGroup": {
+          "Type": "AWS::Logs::LogGroup",
+          "Properties": {
+            "LogGroupName": "/aws/lambda/serverless-url-shortener-dev-shorten"
+          }
+        },
+        "RedirectLogGroup": {
+          "Type": "AWS::Logs::LogGroup",
+          "Properties": {
+            "LogGroupName": "/aws/lambda/serverless-url-shortener-dev-redirect"
+          }
+        },
+        "IamRoleLambdaExecution": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "AssumeRolePolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": [
+                      "lambda.amazonaws.com"
+                    ]
+                  },
+                  "Action": [
+                    "sts:AssumeRole"
+                  ]
+                }
+              ]
+            },
+            "Policies": [
+              {
+                "PolicyName": {
+                  "Fn::Join": [
+                    "-",
+                    [
+                      "serverless-url-shortener",
+                      "dev",
+                      "lambda"
+                    ]
+                  ]
+                },
+                "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "logs:CreateLogStream",
+                        "logs:CreateLogGroup",
+                        "logs:TagResource"
+                      ],
+                      "Resource": [
+                        {
+                          "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-url-shortener-dev*:*"
+                        }
+                      ]
+                    },
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "logs:PutLogEvents"
+                      ],
+                      "Resource": [
+                        {
+                          "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-url-shortener-dev*:*:*"
+                        }
+                      ]
+                    },
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "dynamodb:PutItem",
+                        "dynamodb:GetItem"
+                      ],
+                      "Resource": {
+                        "Fn::GetAtt": [
+                          "UrlTable",
+                          "Arn"
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ],
+            "Path": "/",
+            "RoleName": {
+              "Fn::Join": [
+                "-",
+                [
+                  "serverless-url-shortener",
+                  "dev",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  "lambdaRole"
+                ]
+              ]
+            }
+          }
+        },
+        "ShortenLambdaFunction": {
+          "Type": "AWS::Lambda::Function",
+          "Properties": {
+            "Code": {
+              "S3Bucket": "serverless-framework-deployments-us-east-1-2ecb83af-621c",
+              "S3Key": "serverless/serverless-url-shortener/dev/1772623413616-2026-03-04T11:23:33.616Z/serverless-url-shortener.zip"
+            },
+            "Handler": "handler.shorten",
+            "Runtime": "nodejs18.x",
+            "FunctionName": "serverless-url-shortener-dev-shorten",
+            "MemorySize": 1024,
+            "Timeout": 6,
+            "Environment": {
+              "Variables": {
+                "TABLE_NAME": "serverless-url-shortener-table"
+              }
+            },
+            "Role": {
+              "Fn::GetAtt": [
+                "IamRoleLambdaExecution",
+                "Arn"
+              ]
+            }
+          },
+          "DependsOn": [
+            "ShortenLogGroup"
+          ]
+        },
+        "RedirectLambdaFunction": {
+          "Type": "AWS::Lambda::Function",
+          "Properties": {
+            "Code": {
+              "S3Bucket": "serverless-framework-deployments-us-east-1-2ecb83af-621c",
+              "S3Key": "serverless/serverless-url-shortener/dev/1772623413616-2026-03-04T11:23:33.616Z/serverless-url-shortener.zip"
+            },
+            "Handler": "handler.redirect",
+            "Runtime": "nodejs18.x",
+            "FunctionName": "serverless-url-shortener-dev-redirect",
+            "MemorySize": 1024,
+            "Timeout": 6,
+            "Environment": {
+              "Variables": {
+                "TABLE_NAME": "serverless-url-shortener-table"
+              }
+            },
+            "Role": {
+              "Fn::GetAtt": [
+                "IamRoleLambdaExecution",
+                "Arn"
+              ]
+            }
+          },
+          "DependsOn": [
+            "RedirectLogGroup"
+          ]
+        },
+        "ShortenLambdaVersion1IBRI87HYpwXv2yv1CB5cqbbmUYLD5A4mmb7G877tY": {
+          "Type": "AWS::Lambda::Version",
+          "DeletionPolicy": "Retain",
+          "Properties": {
+            "FunctionName": {
+              "Ref": "ShortenLambdaFunction"
+            },
+            "CodeSha256": "m48usPY6B9wIPA3kVaaUPBnXJH7+K9XRhlPdEm0P6i8="
+          }
+        },
+        "RedirectLambdaVersionlNmxMKmumlL1h3scoUV8QWUduA9nfON7ImNKI0LkITU": {
+          "Type": "AWS::Lambda::Version",
+          "DeletionPolicy": "Retain",
+          "Properties": {
+            "FunctionName": {
+              "Ref": "RedirectLambdaFunction"
+            },
+            "CodeSha256": "m48usPY6B9wIPA3kVaaUPBnXJH7+K9XRhlPdEm0P6i8="
+          }
+        },
+        "ApiGatewayRestApi": {
+          "Type": "AWS::ApiGateway::RestApi",
+          "Properties": {
+            "Name": "dev-serverless-url-shortener",
+            "EndpointConfiguration": {
+              "Types": [
+                "EDGE"
+              ]
+            },
+            "Policy": ""
+          }
+        },
+        "ApiGatewayResourceShorten": {
+          "Type": "AWS::ApiGateway::Resource",
+          "Properties": {
+            "ParentId": {
+              "Fn::GetAtt": [
+                "ApiGatewayRestApi",
+                "RootResourceId"
+              ]
+            },
+            "PathPart": "shorten",
+            "RestApiId": {
+              "Ref": "ApiGatewayRestApi"
+            }
+          }
+        },
+        "ApiGatewayResourceShortcodeVar": {
+          "Type": "AWS::ApiGateway::Resource",
+          "Properties": {
+            "ParentId": {
+              "Fn::GetAtt": [
+                "ApiGatewayRestApi",
+                "RootResourceId"
+              ]
+            },
+            "PathPart": "{shortCode}",
+            "RestApiId": {
+              "Ref": "ApiGatewayRestApi"
+            }
+          }
+        },
+        "ApiGatewayMethodShortenPost": {
+          "Type": "AWS::ApiGateway::Method",
+          "Properties": {
+            "HttpMethod": "POST",
+            "RequestParameters": {},
+            "ResourceId": {
+              "Ref": "ApiGatewayResourceShorten"
+            },
+            "RestApiId": {
+              "Ref": "ApiGatewayRestApi"
+            },
+            "ApiKeyRequired": "<REDACTED>",
+            "AuthorizationType": "NONE",
+            "Integration": {
+              "IntegrationHttpMethod": "POST",
+              "Type": "AWS_PROXY",
+              "Uri": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":apigateway:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":lambda:path/2015-03-31/functions/",
+                    {
+                      "Fn::GetAtt": [
+                        "ShortenLambdaFunction",
+                        "Arn"
+                      ]
+                    },
+                    "/invocations"
+                  ]
+                ]
+              }
+            },
+            "MethodResponses": []
+          },
+          "DependsOn": [
+            "ShortenLambdaPermissionApiGateway"
+          ]
+        },
+        "ApiGatewayMethodShortcodeVarGet": {
+          "Type": "AWS::ApiGateway::Method",
+          "Properties": {
+            "HttpMethod": "GET",
+            "RequestParameters": {},
+            "ResourceId": {
+              "Ref": "ApiGatewayResourceShortcodeVar"
+            },
+            "RestApiId": {
+              "Ref": "ApiGatewayRestApi"
+            },
+            "ApiKeyRequired": "<REDACTED>",
+            "AuthorizationType": "NONE",
+            "Integration": {
+              "IntegrationHttpMethod": "POST",
+              "Type": "AWS_PROXY",
+              "Uri": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":apigateway:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":lambda:path/2015-03-31/functions/",
+                    {
+                      "Fn::GetAtt": [
+                        "RedirectLambdaFunction",
+                        "Arn"
+                      ]
+                    },
+                    "/invocations"
+                  ]
+                ]
+              }
+            },
+            "MethodResponses": []
+          },
+          "DependsOn": [
+            "RedirectLambdaPermissionApiGateway"
+          ]
+        },
+        "ApiGatewayDeployment1772623403164": {
+          "Type": "AWS::ApiGateway::Deployment",
+          "Properties": {
+            "RestApiId": {
+              "Ref": "ApiGatewayRestApi"
+            },
+            "StageName": "dev"
+          },
+          "DependsOn": [
+            "ApiGatewayMethodShortenPost",
+            "ApiGatewayMethodShortcodeVarGet"
+          ]
+        },
+        "ShortenLambdaPermissionApiGateway": {
+          "Type": "AWS::Lambda::Permission",
+          "Properties": {
+            "FunctionName": {
+              "Fn::GetAtt": [
+                "ShortenLambdaFunction",
+                "Arn"
+              ]
+            },
+            "Action": "lambda:InvokeFunction",
+            "Principal": "apigateway.amazonaws.com",
+            "SourceArn": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:",
+                  {
+                    "Ref": "AWS::Partition"
+                  },
+                  ":execute-api:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":",
+                  {
+                    "Ref": "ApiGatewayRestApi"
+                  },
+                  "/*/*"
+                ]
+              ]
+            }
+          }
+        },
+        "RedirectLambdaPermissionApiGateway": {
+          "Type": "AWS::Lambda::Permission",
+          "Properties": {
+            "FunctionName": {
+              "Fn::GetAtt": [
+                "RedirectLambdaFunction",
+                "Arn"
+              ]
+            },
+            "Action": "lambda:InvokeFunction",
+            "Principal": "apigateway.amazonaws.com",
+            "SourceArn": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:",
+                  {
+                    "Ref": "AWS::Partition"
+                  },
+                  ":execute-api:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":",
+                  {
+                    "Ref": "ApiGatewayRestApi"
+                  },
+                  "/*/*"
+                ]
+              ]
+            }
+          }
+        },
+        "UrlTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "serverless-url-shortener-table",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "shortCode",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "shortCode",
+                "KeyType": "HASH"
+              }
+            ],
+            "BillingMode": "PAY_PER_REQUEST"
+          }
+        }
+      },
+      "Outputs": {
+        "ServerlessDeploymentBucketName": {
+          "Value": "serverless-framework-deployments-us-east-1-2ecb83af-621c",
+          "Export": {
+            "Name": "sls-serverless-url-shortener-dev-ServerlessDeploymentBucketName"
+          }
+        },
+        "ShortenLambdaFunctionQualifiedArn": {
+          "Description": "Current Lambda function version",
+          "Value": {
+            "Ref": "ShortenLambdaVersion1IBRI87HYpwXv2yv1CB5cqbbmUYLD5A4mmb7G877tY"
+          },
+          "Export": {
+            "Name": "sls-serverless-url-shortener-dev-ShortenLambdaFunctionQualifiedArn"
+          }
+        },
+        "RedirectLambdaFunctionQualifiedArn": {
+          "Description": "Current Lambda function version",
+          "Value": {
+            "Ref": "RedirectLambdaVersionlNmxMKmumlL1h3scoUV8QWUduA9nfON7ImNKI0LkITU"
+          },
+          "Export": {
+            "Name": "sls-serverless-url-shortener-dev-RedirectLambdaFunctionQualifiedArn"
+          }
+        },
+        "ServiceEndpoint": {
+          "Description": "URL of the service endpoint",
+          "Value": {
+            "Fn::Join": [
+              "",
+              [
+                "https://",
+                {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                ".execute-api.",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ".",
+                {
+                  "Ref": "AWS::URLSuffix"
+                },
+                "/dev"
+              ]
+            ]
+          },
+          "Export": {
+            "Name": "sls-serverless-url-shortener-dev-ServiceEndpoint"
+          }
+        }
+      }
+    }
+  }
+}
