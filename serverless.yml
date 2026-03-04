@@ -4,11 +4,19 @@ provider:
   name: aws
   runtime: nodejs18.x
   region: us-east-1
-  # Đảm bảo không có dấu ngoặc dư thừa ở đây
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:GetItem
+          Resource: 
+            - Fn::GetAtt: [UrlShortenerTable, Arn]
 
 functions:
-  shorten: # Thụt lề 2 dấu cách
-    handler: handler.shorten # Thụt lề 4 dấu cách
+  shorten:
+    handler: handler.shorten
     events:
       - http:
           path: shorten
@@ -25,3 +33,17 @@ functions:
       - http:
           path: docs
           method: get
+
+resources:
+  Resources:
+    UrlShortenerTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: serverless-url-shortener-table
+        AttributeDefinitions:
+          - AttributeName: shortCode
+            AttributeType: S
+        KeySchema:
+          - AttributeName: shortCode
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
