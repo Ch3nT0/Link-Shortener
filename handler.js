@@ -18,7 +18,7 @@ module.exports.shorten = async (event) => {
 
   return {
     statusCode: 200,
-    body: JSON.stringify({ shortUrl: `https://${event.headers.Host}/${shortCode}` }),
+    body: JSON.stringify({ shortUrl: `https://${event.headers.Host}/dev/${shortCode}` }),
   };
 };
 
